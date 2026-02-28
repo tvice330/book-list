@@ -23,8 +23,6 @@ class BookResource extends JsonResource
             'published_at' => $this->published_at?->format('Y-m-d'),
             'word_count' => $this->word_count,
             'price_usd' => $this->price_usd,
-            'created_at' => $this->created_at,
-            'updated_at' => $this->updated_at,
         ];
     }
 }

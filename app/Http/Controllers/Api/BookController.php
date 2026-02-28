@@ -10,6 +10,7 @@ use App\Models\Book;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 use Illuminate\Http\Response;
+use Illuminate\Support\Facades\DB;
 
 class BookController extends Controller
 {
@@ -26,7 +27,7 @@ class BookController extends Controller
      */
     public function store(StoreBookRequest $request): JsonResponse
     {
-        $book = Book::query()->create($request->validated());
+        $book = DB::transaction(fn () => Book::query()->create($request->validated()));
 
         return $this->bookResponse($book, 201);
     }
@@ -44,7 +45,7 @@ class BookController extends Controller
      */
     public function update(UpdateBookRequest $request, Book $book): JsonResponse
     {
-        $book->update($request->validated());
+        DB::transaction(fn () => $book->update($request->validated()));
 
         return $this->bookResponse($book);
     }
@@ -54,7 +55,7 @@ class BookController extends Controller
      */
     public function destroy(Book $book): Response
     {
-        $book->delete();
+        DB::transaction(fn () => $book->delete());
 
         return response()->noContent();
     }

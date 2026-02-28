@@ -81,12 +81,15 @@ docker-compose exec app php artisan migrate --seed
 
 The app will be available at `http://localhost:8000`.
 
+Container reads Laravel `.env` directly from the mounted project root (`./:/var/www/html`).
+Configure DB only in the project `.env` via `DB_*` variables.
+`docker-compose.yml` does not start a DB service and does not override `DB_*`.
+
 ## Swagger UI
 
 - UI: `http://localhost:8000/swagger`
-- Spec file: `resources/swagger/openapi.json`
-
-Swagger route is enabled in local environment.
+- Spec URL: `http://localhost:8000/swagger/openapi.json`
+- Spec file on disk: `resources/swagger/openapi.json`
 
 ## Tests
 
@@ -96,17 +99,18 @@ Run test suite:
 php artisan test
 ```
 
-Tests use SQLite in-memory DB (`phpunit.xml`):
-
-- `DB_CONNECTION=sqlite`
-- `DB_DATABASE=:memory:`
+Tests run with `APP_ENV=testing` and load `.env.testing`.
+Create a dedicated MySQL database (for example `book_list_test`) before running tests.
+Grant your DB user access to `book_list_test` and set credentials in `.env.testing`.
+Feature tests use the configured MySQL connection and wrap each test in a transaction with automatic rollback.
+Database schema is created once per test process (`migrate:fresh`), not before every single test.
 
 ## Suggested commit history
 
 - chore: init project / align to Laravel 12
+- docs: add Readme.md describe
 - feat: add books database setup
 - feat: add books CRUD API
-- test: add books API feature tests
-- docs: add Swagger UI
-- chore: add Docker setup
-- ci: add GitHub Actions tests
+- test: add books API feature tests, run test's
+- docs: add and test Swagger UI
+- chore: add and test Docker setup
