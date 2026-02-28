@@ -1,0 +1,269 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "Library REST API",
+    "version": "1.0.0",
+    "description": "CRUD API for books"
+  },
+  "servers": [
+    {
+      "url": "http://localhost:8000"
+    }
+  ],
+  "paths": {
+    "/api/books": {
+      "get": {
+        "summary": "List books",
+        "responses": {
+          "200": {
+            "description": "Paginated list of books",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/Book"
+                      }
+                    },
+                    "links": {
+                      "type": "object"
+                    },
+                    "meta": {
+                      "type": "object"
+                    }
+                  }
+                },
+                "examples": {
+                  "ok": {
+                    "value": {
+                      "data": [
+                        {
+                          "id": 1,
+                          "title": "Clean Code",
+                          "publisher": "Prentice Hall",
+                          "author": "Robert C. Martin",
+                          "genres": ["software", "engineering"],
+                          "published_at": "2008-08-01",
+                          "word_count": 145000,
+                          "price_usd": "39.99",
+                          "created_at": "2026-02-28T10:00:00.000000Z",
+                          "updated_at": "2026-02-28T10:00:00.000000Z"
+                        }
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "summary": "Create a book",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BookCreate"
+              },
+              "example": {
+                "title": "Domain-Driven Design",
+                "publisher": "Addison-Wesley",
+                "author": "Eric Evans",
+                "genres": ["software", "architecture"],
+                "published_at": "2003-08-30",
+                "word_count": 220000,
+                "price_usd": 54.99
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/Book"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation error"
+          }
+        }
+      }
+    },
+    "/api/books/{id}": {
+      "parameters": [
+        {
+          "name": "id",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "integer"
+          }
+        }
+      ],
+      "get": {
+        "summary": "Show a book",
+        "responses": {
+          "200": {
+            "description": "Book found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/Book"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found"
+          }
+        }
+      },
+      "patch": {
+        "summary": "Update a book partially",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BookUpdate"
+              },
+              "example": {
+                "title": "Refactoring (2nd Edition)",
+                "price_usd": 44.50
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Updated",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/Book"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found"
+          },
+          "422": {
+            "description": "Validation error"
+          }
+        }
+      },
+      "delete": {
+        "summary": "Delete a book",
+        "responses": {
+          "204": {
+            "description": "Deleted"
+          },
+          "404": {
+            "description": "Not found"
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "Book": {
+        "type": "object",
+        "required": [
+          "id",
+          "title",
+          "publisher",
+          "author",
+          "genres",
+          "published_at",
+          "word_count",
+          "price_usd",
+          "created_at",
+          "updated_at"
+        ],
+        "properties": {
+          "id": { "type": "integer", "example": 1 },
+          "title": { "type": "string", "maxLength": 255 },
+          "publisher": { "type": "string", "maxLength": 255 },
+          "author": { "type": "string", "maxLength": 255 },
+          "genres": {
+            "type": "array",
+            "items": { "type": "string", "maxLength": 100 }
+          },
+          "published_at": { "type": "string", "format": "date", "example": "2024-01-01" },
+          "word_count": { "type": "integer", "minimum": 0, "example": 120000 },
+          "price_usd": { "type": "string", "example": "19.99" },
+          "created_at": { "type": "string", "format": "date-time" },
+          "updated_at": { "type": "string", "format": "date-time" }
+        }
+      },
+      "BookCreate": {
+        "type": "object",
+        "required": [
+          "title",
+          "publisher",
+          "author",
+          "genres",
+          "published_at",
+          "word_count",
+          "price_usd"
+        ],
+        "properties": {
+          "title": { "type": "string", "maxLength": 255 },
+          "publisher": { "type": "string", "maxLength": 255 },
+          "author": { "type": "string", "maxLength": 255 },
+          "genres": {
+            "type": "array",
+            "minItems": 1,
+            "items": { "type": "string", "maxLength": 100 }
+          },
+          "published_at": { "type": "string", "format": "date" },
+          "word_count": { "type": "integer", "minimum": 0 },
+          "price_usd": { "type": "number", "minimum": 0 }
+        }
+      },
+      "BookUpdate": {
+        "type": "object",
+        "properties": {
+          "title": { "type": "string", "maxLength": 255 },
+          "publisher": { "type": "string", "maxLength": 255 },
+          "author": { "type": "string", "maxLength": 255 },
+          "genres": {
+            "type": "array",
+            "minItems": 1,
+            "items": { "type": "string", "maxLength": 100 }
+          },
+          "published_at": { "type": "string", "format": "date" },
+          "word_count": { "type": "integer", "minimum": 0 },
+          "price_usd": { "type": "number", "minimum": 0 }
+        }
+      }
+    }
+  }
+}
