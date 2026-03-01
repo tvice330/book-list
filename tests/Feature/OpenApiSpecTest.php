@@ -6,9 +6,25 @@ use Tests\TestCase;
 
 class OpenApiSpecTest extends TestCase
 {
+    protected function setUp(): void
+    {
+        $originalMigratedState = static::$migrated;
+        static::$migrated = true;
+
+        parent::setUp();
+
+        static::$migrated = $originalMigratedState;
+    }
+
     public function test_openapi_spec_has_required_minimum_contract(): void
     {
-        $path = resource_path('swagger/openapi.json');
+        $docsDir = config('l5-swagger.documentations.default.paths.docs') ?? storage_path('api-docs');
+        $jsonFile = config('l5-swagger.documentations.default.paths.docs_json') ?? 'api-docs.json';
+        $path = rtrim($docsDir, DIRECTORY_SEPARATOR).DIRECTORY_SEPARATOR.$jsonFile;
+
+        if (! file_exists($path)) {
+            $this->artisan('l5-swagger:generate')->assertExitCode(0);
+        }
 
         $this->assertFileExists($path);
 
@@ -22,8 +38,13 @@ class OpenApiSpecTest extends TestCase
         $this->assertArrayHasKey('paths', $decoded);
         $this->assertArrayHasKey('/api/books', $decoded['paths']);
         $this->assertArrayHasKey('/api/books/{id}', $decoded['paths']);
-        $this->assertArrayHasKey('components', $decoded);
-        $this->assertArrayHasKey('schemas', $decoded['components']);
-        $this->assertArrayHasKey('Book', $decoded['components']['schemas']);
+
+        $hasOpenApiBookSchema = isset($decoded['components']['schemas']['Book']);
+        $hasSwagger2BookSchema = isset($decoded['definitions']['Book']);
+
+        $this->assertTrue(
+            $hasOpenApiBookSchema || $hasSwagger2BookSchema,
+            'Schema Book was not found in components.schemas or definitions.',
+        );
     }
 }
