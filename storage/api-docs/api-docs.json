@@ -1,0 +1,351 @@
+{
+    "openapi": "3.0.0",
+    "info": {
+        "title": "Book List API",
+        "version": "1.0.0"
+    },
+    "servers": [
+        {
+            "url": "http://localhost:8000",
+            "description": "Local"
+        }
+    ],
+    "paths": {
+        "/api/books": {
+            "get": {
+                "tags": [
+                    "Books"
+                ],
+                "summary": "List books",
+                "operationId": "9017a3fa89d6636329067c858b27a6fa",
+                "responses": {
+                    "200": {
+                        "description": "Paginated list of books (data + meta + links)",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/BooksIndexResponse"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "post": {
+                "tags": [
+                    "Books"
+                ],
+                "summary": "Create book",
+                "operationId": "72f82e1cd6f08112323f87053277ca99",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/BookCreate"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/BookResponse"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation error"
+                    }
+                }
+            }
+        },
+        "/api/books/{id}": {
+            "get": {
+                "tags": [
+                    "Books"
+                ],
+                "summary": "Show book",
+                "operationId": "123856ec83e3466396b979a43eb1a15f",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/BookResponse"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Not found"
+                    }
+                }
+            },
+            "delete": {
+                "tags": [
+                    "Books"
+                ],
+                "summary": "Delete book",
+                "operationId": "eda12c526d0ccacaecea5f3d8f15d6df",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No content"
+                    },
+                    "404": {
+                        "description": "Not found"
+                    }
+                }
+            },
+            "patch": {
+                "tags": [
+                    "Books"
+                ],
+                "summary": "Update book",
+                "operationId": "3c5c1488774a14a2fa2e72f9ccee25d5",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/BookUpdate"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/BookResponse"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Not found"
+                    },
+                    "422": {
+                        "description": "Validation error"
+                    }
+                }
+            }
+        }
+    },
+    "components": {
+        "schemas": {
+            "Book": {
+                "required": [
+                    "id",
+                    "title",
+                    "publisher",
+                    "author",
+                    "genres",
+                    "published_at",
+                    "word_count",
+                    "price_usd"
+                ],
+                "properties": {
+                    "id": {
+                        "type": "integer",
+                        "example": 1
+                    },
+                    "title": {
+                        "type": "string",
+                        "maxLength": 255,
+                        "example": "Clean Code"
+                    },
+                    "publisher": {
+                        "type": "string",
+                        "maxLength": 255,
+                        "example": "Prentice Hall"
+                    },
+                    "author": {
+                        "type": "string",
+                        "maxLength": 255,
+                        "example": "Robert C. Martin"
+                    },
+                    "genres": {
+                        "type": "array",
+                        "items": {
+                            "type": "string",
+                            "maxLength": 100,
+                            "example": "software"
+                        },
+                        "minItems": 1
+                    },
+                    "published_at": {
+                        "type": "string",
+                        "format": "date",
+                        "example": "2008-08-01"
+                    },
+                    "word_count": {
+                        "type": "integer",
+                        "minimum": 0,
+                        "example": 145000
+                    },
+                    "price_usd": {
+                        "type": "string",
+                        "example": "39.99"
+                    }
+                },
+                "type": "object"
+            },
+            "BookCreate": {
+                "required": [
+                    "title",
+                    "publisher",
+                    "author",
+                    "genres",
+                    "published_at",
+                    "word_count",
+                    "price_usd"
+                ],
+                "properties": {
+                    "title": {
+                        "type": "string",
+                        "maxLength": 255
+                    },
+                    "publisher": {
+                        "type": "string",
+                        "maxLength": 255
+                    },
+                    "author": {
+                        "type": "string",
+                        "maxLength": 255
+                    },
+                    "genres": {
+                        "type": "array",
+                        "items": {
+                            "type": "string",
+                            "maxLength": 100
+                        },
+                        "minItems": 1
+                    },
+                    "published_at": {
+                        "type": "string",
+                        "format": "date"
+                    },
+                    "word_count": {
+                        "type": "integer",
+                        "minimum": 0
+                    },
+                    "price_usd": {
+                        "type": "number",
+                        "format": "float",
+                        "minimum": 0
+                    }
+                },
+                "type": "object"
+            },
+            "BookUpdate": {
+                "properties": {
+                    "title": {
+                        "type": "string",
+                        "maxLength": 255
+                    },
+                    "publisher": {
+                        "type": "string",
+                        "maxLength": 255
+                    },
+                    "author": {
+                        "type": "string",
+                        "maxLength": 255
+                    },
+                    "genres": {
+                        "type": "array",
+                        "items": {
+                            "type": "string",
+                            "maxLength": 100
+                        },
+                        "minItems": 1
+                    },
+                    "published_at": {
+                        "type": "string",
+                        "format": "date"
+                    },
+                    "word_count": {
+                        "type": "integer",
+                        "minimum": 0
+                    },
+                    "price_usd": {
+                        "type": "number",
+                        "format": "float",
+                        "minimum": 0
+                    }
+                },
+                "type": "object"
+            },
+            "BookResponse": {
+                "properties": {
+                    "data": {
+                        "$ref": "#/components/schemas/Book"
+                    }
+                },
+                "type": "object"
+            },
+            "BooksIndexResponse": {
+                "properties": {
+                    "data": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/Book"
+                        }
+                    },
+                    "links": {
+                        "type": "object",
+                        "additionalProperties": true
+                    },
+                    "meta": {
+                        "type": "object",
+                        "additionalProperties": true
+                    }
+                },
+                "type": "object"
+            }
+        }
+    },
+    "tags": [
+        {
+            "name": "Books",
+            "description": "Book CRUD"
+        }
+    ]
+}

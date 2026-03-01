@@ -67,29 +67,43 @@ App URL: `http://127.0.0.1:8000`
 Build and run:
 
 ```bash
-docker-compose up --build
+docker compose up --build
 ```
 
-Then, in another terminal, run initial setup inside container:
+On container start, `entrypoint.sh` runs all bootstrap steps automatically:
 
-```bash
-docker-compose exec app composer install
-docker-compose exec app cp .env.example .env
-docker-compose exec app php artisan key:generate
-docker-compose exec app php artisan migrate --seed
-```
+- `composer install` (with `require-dev`)
+- checks `.env` exists in project root
+- generates `APP_KEY` when empty
+- clears config/cache
+- waits for external DB availability
+- `php artisan migrate --force`
+- `php artisan test`
+- `php artisan l5-swagger:generate`
+- starts server: `php artisan serve --host=0.0.0.0 --port=8000`
 
 The app will be available at `http://localhost:8000`.
 
 Container reads Laravel `.env` directly from the mounted project root (`./:/var/www/html`).
 Configure DB only in the project `.env` via `DB_*` variables.
-`docker-compose.yml` does not start a DB service and does not override `DB_*`.
+`docker-compose.yml` does not start a DB service and does not set DB credentials (`DB_DATABASE/DB_USERNAME/DB_PASSWORD`).
+For Docker mode, the container uses `DB_HOST=host.docker.internal` (Linux via `host-gateway`) to access MySQL running on the host.
+You can keep local `.env` as `DB_HOST=127.0.0.1` for non-Docker runs.
+External MySQL must be reachable from the container before startup completes.
+If any bootstrap step fails, the container exits with an error and the web server is not started.
+
+After startup, you can verify Laravel inside the running container:
+
+```bash
+docker compose exec app php artisan --version
+```
 
 ## Swagger UI
 
 - UI: `http://localhost:8000/swagger`
-- Spec URL: `http://localhost:8000/swagger/openapi.json`
-- Spec file on disk: `resources/swagger/openapi.json`
+- Generate docs: `php artisan l5-swagger:generate`
+- Generated JSON: `storage/api-docs/api-docs.json`
+- Swagger documentation is generated from PHP OpenAPI annotations (`swagger-php` + `l5-swagger`).
 
 ## Tests
 
@@ -99,7 +113,9 @@ Run test suite:
 php artisan test
 ```
 
-Tests run with `APP_ENV=testing` and load `.env.testing`.
+`php artisan test` runs both Feature and Unit tests.
+
+Tests run with `APP_ENV=testing` and load `.env.testing` (or your testing environment setup, if different).
 Create a dedicated MySQL database (for example `book_list_test`) before running tests.
 Grant your DB user access to `book_list_test` and set credentials in `.env.testing`.
 Feature tests use the configured MySQL connection and wrap each test in a transaction with automatic rollback.
