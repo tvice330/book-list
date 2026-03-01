@@ -32,7 +32,7 @@ else
 fi
 
 log "Clearing Laravel config..."
-php artisan optimize
+php artisan optimize:clear
 
 log "Waiting for database connection (timeout: ${DB_WAIT_TIMEOUT}s)..."
 db_ready=0
